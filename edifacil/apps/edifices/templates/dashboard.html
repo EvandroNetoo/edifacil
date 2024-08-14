@@ -1,0 +1,81 @@
+{% extends 'base_htmls/base.html' %}
+
+{% block body %}
+
+    <div class="container">
+        <h1 class="mb-4">Dashboard</h1>
+        <div class="d-flex justify-content-between mb-4">
+            <h4>Meus edifícios</h4>
+            <button class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addEdificeModal">Adicionar edifício</button>
+        </div>
+
+        {% if edifices %}
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Edifício</th>
+                        <th class="text-center">QTD Residências</th>
+                        <td class="text-center">Acessar</td>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {% for edifice in edifices %}
+
+                        <tr>
+                            <td>{{ edifice.name }}</td>
+                            <td class="text-center">{{ edifice.qtd_residences }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'edifice' edifice.id %}">Acessar</a>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        {% else %}
+
+            <h3>Nenhum edifício cadastrado</h3>
+
+        {% endif %}
+
+    </div>
+    <div class="modal fade"
+         id="addEdificeModal"
+         tabindex="-1"
+         aria-labelledby="addEdificeModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <form hx-post="{% url 'dashboard' %}"
+                  hx-target="#form"
+                  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                  class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="addEdificeModalLabel">Adicionar edifício</h1>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="form">
+
+                        {% include 'partials/form.html' %}
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock body %}

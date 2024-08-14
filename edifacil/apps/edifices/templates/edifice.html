@@ -1,0 +1,149 @@
+{% extends 'base_htmls/base.html' %}
+
+{% block body %}
+
+    <div class="container">
+        <h1 class="mb-4">Edifício: {{ edifice.name }}</h1>
+        <div class="d-flex justify-content-between mb-4">
+            <h4>Residências</h4>
+            <button class="btn btn-secondary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editEdificeModal">Editar edifício</button>
+        </div>
+
+        {% include 'partials/messages.html' %}
+
+        <p>Residências: {{ edifice.qtd_residences }}</p>
+        <p>Taxa fixa: R$ {{ edifice.fixed_bill }}</p>
+
+        <div class="d-flex justify-content-between mt-4 mb-4">
+            <a href="{% url 'generate_condominium' edifice.id %}"
+               class="btn btn-warning">Gerar condominio</a>
+            <button class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addResidenceModal">Adicionar residência</button>
+        </div>
+
+        {% if edifice.residences.all %}
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Residência</th>
+                        <td class="text-center">Acessar</td>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {% for residence in edifice.residences.all %}
+
+                        <tr>
+                            <td>{{ residence }}</td>
+                            <td class="text-center">
+                                <a href=" ">Acessar</a>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        {% else %}
+
+            <h3>Nenhuma residência cadastrada</h3>
+
+        {% endif %}
+            <h4 class="mt-4">Condomínios</h4>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mẽs</th>
+                        <td class="text-center">Acessar</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    {% for month_billing in edifice.monthly_billings.all %}
+                    <tr>
+                        <td>{{ month_billing }}</td>
+                        <td class="text-center">
+                            <a href="{% url 'condominium' month_billing.id %}">Acessar</a>
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+                </tbody>
+            </table>
+
+
+    </div>
+
+    <div class="modal fade"
+         id="editEdificeModal"
+         tabindex="-1"
+         aria-labelledby="editEdificeModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <form hx-post="{% url 'edifice' edifice.id %}"
+                  hx-target="#edit-edifice-form"
+                  hx-headers='{"X-CSRFToken": "{{ csrf_token }}", "form-class": "edit-edifice-form"}'
+                  class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="editEdificeModalLabel">Editar edifício</h1>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="edit-edifice-form">
+
+                        {% include 'partials/form.html' with form=edit_edifice_form_class %}
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary">Salvar alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade"
+         id="addResidenceModal"
+         tabindex="-1"
+         aria-labelledby="addResidenceModalLabel"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <form hx-post="{% url 'edifice' edifice.id %}"
+                  hx-target="#add-residence-form"
+                  hx-headers='{"X-CSRFToken": "{{ csrf_token }}", "form-class": "add-residence-form"}'
+                  class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="addResidenceModalLabel">Adicionar residência</h1>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="add-residence-form">
+
+                        {% include 'partials/form.html' with form=add_residence_form_class %}
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+{% endblock body %}

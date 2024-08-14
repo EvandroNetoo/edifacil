@@ -1,0 +1,36 @@
+{% extends 'base_htmls/base.html' %}
+
+{% block body %}
+
+    <div class="container">
+        <h1 class="mb-4">condominio: {{condominium }}</h1>
+
+            <h4 class="mt-4">Cobranças</h4>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Residência</th>
+                        <td class="text-center">Acessar</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    {% for condominium_billing in condominium.condominium_billings.all %}
+                    <tr>
+                        <td>{{ condominium_billing }}</td>
+                        <td class="text-center">
+                            <a href="{% url 'condominium_billing_pdf' condominium_billing.id %}" target="_blank">Acessar</a>
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+                </tbody>
+            </table>
+
+
+    </div>
+
+  
+
+{% endblock body %}

@@ -1,0 +1,38 @@
+{% load widget_tweaks %}
+
+<div class=" 
+    {% if field.errors %}invalid-input{% endif %}
+  
+    {% if col_class %}{{ col_class }}{% endif %}
+     ">
+    <div class="d-flex justify-content-between mt-2">
+        {{ field|add_label_class:"fw-bold" }}
+
+        {% if not field.field.required %}<span class="fw-light">Opcional</span>{% endif %}
+
+
+    </div>
+    <div class="mt-1 mb-3">
+
+        {{ field|add_class:"form-control" }}
+
+        {% if field.field.help_text %}
+
+            <p class="m-0 fw-light" style="font-size: 14;">{{ field.field.help_text|striptags }}</p>
+
+        {% endif %}
+
+
+        {% if field.errors %}
+
+            <div class="invalid-input-feedback">
+
+                {% for error in field.errors %}<p class="m-0">{{ error }}</p>{% endfor %}
+
+            </div>
+
+        {% endif %}
+
+
+    </div>
+</div>

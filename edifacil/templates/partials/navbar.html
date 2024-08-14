@@ -1,0 +1,51 @@
+{% load static %}
+
+<nav class="navbar navbar-expand bg-body-tertiary mb-5 px-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <img src="{% static 'general/img/logo.png' %}"
+                 alt="Logo"
+                 width="24"
+                 class="d-inline-block align-text-top">
+            EDIFÁCIL
+        </a>
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+
+            <ul class="navbar-nav">
+
+                {% if request.user.is_authenticated %}
+
+                    <li class="nav-item">
+                        <a class="nav-link active"
+                           aria-current="page"
+                           href="{% url 'dashboard' %}">Edifícios</a>
+                    </li>
+
+                {% else %}
+
+                    <li class="nav-item">
+                        <a class="nav-link active"
+                           aria-current="page"
+                           href="{% url 'sign_up' %}">Cadastrar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active"
+                           aria-current="page"
+                           href="{% url 'sign_in' %}">Entrar</a>
+                    </li>
+
+                {% endif %}
+
+            </ul>
+        </div>
+    </div>
+</nav>

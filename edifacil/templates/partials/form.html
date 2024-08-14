@@ -1,0 +1,32 @@
+<style>
+    .invalid-input .invalid-input-feedback {
+        color: rgb(255, 120, 120);
+        font-size: 14px;
+    }
+
+    .invalid-input .form-control {
+        border: 1px solid rgb(255, 120, 120);
+        box-shadow: 4px rgb(255, 120, 120);
+    }
+</style>
+
+{% if form.non_field_errors %}
+
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+
+        {% for error in form.non_field_errors %}<p class="m-0" style="font-size: 14px;">{{ error }}</p>{% endfor %}
+
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"></button>
+    </div>
+
+{% endif %}
+
+{% for field in form %}
+
+    {% include "partials/form_field.html" %}
+
+{% endfor %}

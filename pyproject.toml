@@ -1,0 +1,59 @@
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1"
+django-htmx = "^1.19.0"
+pydantic-settings = "^2.4.0"
+django-widget-tweaks = "^1.5.0"
+pdfkit = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+django-debug-toolbar = "^4.4.6"
+django-browser-reload = "^1.13.0"
+taskipy = "^1.13.0"
+djlint = "^1.34.1"
+ruff = "^0.5.7"
+
+[tool.taskipy.tasks]
+lint = 'ruff check . && djlint . --check'
+format = 'ruff check . --fix && ruff format . && djlint . --reformat --quiet'
+run = 'python edifacil/manage.py runserver'
+makemigrations = 'python edifacil/manage.py makemigrations'
+migrate = 'python edifacil/manage.py migrate'
+
+[tool.ruff]
+line-length = 79
+extend-exclude = ['migrations']
+
+[tool.ruff.lint]
+preview = true
+select = ['A', 'B', 'C', 'E', 'F', 'I', 'N', 'PL', 'PT', 'Q',  'S', 'T', 'W', 'DJ']
+ignore = ['E501', 'Q000', 'Q003']
+
+[tool.ruff.format]
+preview = true
+quote-style = 'single'
+
+[tool.djlint]
+max_blank_lines = 1
+indent = 4
+tabs = true
+format_css = true
+format_js = true
+use_gitignore = true
+space_around_blocks = true
+blank_line_before_tag = 'include,block,endblock,crispy,if,else,endif,for,endfor,comment,endcomment,with'
+blank_line_after_tag = 'include,block,endblock,crispy,if,else,endif,for,endfor,comment,endcomment,with,load,extends'
+ignore = 'H005,H006,H007,H008,H009,H010,H011,H012,H013,H014,H015,H016,H017,H019,H020,H021,H022,H023,H024,H025,H026,H029,H030,H031,H033,H035'
+
+[tool.djlint.css]
+indent_size = 4
+
+[tool.djlint.js]
+indent_size = 4
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

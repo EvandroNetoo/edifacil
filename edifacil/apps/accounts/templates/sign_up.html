@@ -1,0 +1,37 @@
+{% extends 'base_htmls/base.html' %}
+
+{% load static %}
+
+{% block body %}
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col"></div>
+
+            <div class="col-10 col-sm-6 col-md-5 col-lg-4 mt-5 rounded">
+                <div class="text-center">
+                    <img width="150px" src="{% static 'general/img/logo.png' %}">
+                    <h2 class="fw-lighter">EDIFÁCIL</h2>
+                    <h4 class="mt-4">CADASTRAR</h4>
+                </div>
+                <form hx-post="{% url 'sign_up' %}"
+                      hx-target="#form"
+                      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                    <div id="form">
+
+                        {% include 'partials/form.html' with form=form %}
+
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-success mb-4">CADASTRAR</button>
+                        <br>
+                        <span>Já tem conta? <a href="{% url 'sign_in' %}">Entrar</a></span>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col"></div>
+        </div>
+    </div>
+
+{% endblock body %}
