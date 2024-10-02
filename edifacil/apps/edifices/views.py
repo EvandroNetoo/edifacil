@@ -1,12 +1,10 @@
-from dataclasses import field
 import tempfile
 from typing import Any, Type
 
-from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.forms import ModelForm
-from django.http import Http404, HttpRequest, FileResponse, HttpResponse
+from django.http import FileResponse, Http404, HttpRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -17,8 +15,13 @@ from django_htmx.http import (
 )
 
 from edifices.forms import EdificeForm, MonthBillingForm, ResidenceForm
-from edifices.models import CondominiumBilling, Edifice, MonthBilling, Residence
-import pdfkit
+from edifices.models import (
+    CondominiumBilling,
+    Edifice,
+    MonthBilling,
+    Residence,
+)
+
 
 class DashboardView(View):
     template_name = 'dashboard.html'
@@ -188,14 +191,13 @@ class GenerateCondominiumView(View):
             )
         )
 
+
 class CondominiumView(View):
     def get(self, request: HttpRequest, condominium_id: int):
         print(condominium_id)
         condominium = get_object_or_404(MonthBilling, id=condominium_id, edifice__user=request.user)
         context = {'condominium': condominium}
         return render(request, 'condominium.html', context)
-    
-
 
 
 class CondominiumBillingPdfView(View):
@@ -213,6 +215,7 @@ class CondominiumBillingPdfView(View):
                 'TAXA DE LIXO': 'trash_bill_price',
                 'TAXA DE ESGOTO': 'sewage_price',
                 'IPTU': 'iptu_price',
+                'TAXA FIXA': 'residence.edifice.fixed_bill',
             }
             billing.generate_pdf(fields, tmp_pdf.name)
             tmp_pdf.seek(0)

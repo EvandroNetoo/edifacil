@@ -1,13 +1,12 @@
 from decimal import Decimal
 
-from django.conf import settings
-
+import pdfkit
 from accounts.models import User
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.utils import timezone
-import pdfkit
 from django.template.loader import render_to_string
+from django.utils import timezone
 
 positive_value_validator = MinValueValidator(0.01)
 
@@ -236,16 +235,19 @@ class CondominiumBilling(models.Model):
         )
 
     def generate_pdf(self, fields: dict[str, str], file: str) -> bytes:
+        def get_nested_attr(obj, attr_path):
+            for attr in attr_path.split('.'):
+                obj = getattr(obj, attr)
+            return obj
         template_name = 'partials/condominium_billing_pdf.html'
 
         bills = {}
         total = 0
-        for verbose_name, field  in fields.items():
-            field = getattr(self, field)
+        for verbose_name, field in fields.items():
+            field = get_nested_attr(self, field)
             if field != 0:
                 bills[verbose_name] = f'{field:.2f}'.replace('.', ',')
                 total += field
-
 
         context = {
             'billing': self,

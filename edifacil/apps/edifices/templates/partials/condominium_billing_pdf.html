@@ -1,64 +1,64 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 16px;
-            margin: 0;
-            padding: 0;
-        }
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 16px;
+                margin: 0;
+                padding: 0;
+            }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
 
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
+            th,
+            td {
+                padding: 8px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
 
-        th {
-            font-size: 24px;
-            text-align: center;
-        }
+            th {
+                font-size: 24px;
+                text-align: center;
+            }
 
-        .header {
-            background-color: #e0e0e0;
-            text-align: center;
-            padding: 10px;
-            font-size: 28px;
-            font-weight: bold;
-        }
+            .header {
+                background-color: #e0e0e0;
+                text-align: center;
+                padding: 10px;
+                font-size: 28px;
+                font-weight: bold;
+            }
 
-        .total {
-            font-weight: bold;
-            font-size: 20px;
-            text-align: right;
-            padding-top: 10px;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        {{ billing.residence }} | {{billing.month_billing.month|date:"m/Y"}}
-    </div>
-    <table>
-        
-        {% for verbose_name, value  in bills.items %}
-        <tr>
-            <td>{{verbose_name}}</td>
-            <td>R$ {{ value }}</td>
-        </tr>
-        {% endfor %}
-            
-    </table>
-    <div class="total">
-        TOTAL A PAGAR: R$ {{ total }}
-    </div>
-</body>
+            .total {
+                font-weight: bold;
+                font-size: 20px;
+                text-align: right;
+                padding-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">{{ billing.residence }} | {{ billing.month_billing.month|date:"m/Y" }}</div>
+        <table>
+
+            {% for verbose_name, value  in bills.items %}
+
+                <tr>
+                    <td>{{ verbose_name }}</td>
+                    <td>R$ {{ value }}</td>
+                </tr>
+
+            {% endfor %}
+
+
+        </table>
+        <div class="total">TOTAL A PAGAR: R$ {{ total }}</div>
+    </body>
 </html>
