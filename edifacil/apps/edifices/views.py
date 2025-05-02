@@ -2,6 +2,7 @@ import tempfile
 from typing import Any, Type
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.forms import ModelForm
 from django.http import FileResponse, Http404, HttpRequest
@@ -76,8 +77,12 @@ class EdificeView(View):
         edit_edifice_form_class = self.edit_edifice_form_class(
             instance=self.edifice
         )
+
+        condominiums = self.edifice.monthly_billings.order_by('-month')
+
         context = {
             'edifice': self.edifice,
+            'condominiums': condominiums,
             'add_residence_form_class': add_residence_form_class,
             'edit_edifice_form_class': edit_edifice_form_class,
         }
@@ -110,7 +115,7 @@ class EdificeView(View):
         return HttpResponseClientRefresh()
 
 
-@method_decorator(transaction.atomic, 'dispatch')
+@method_decorator([transaction.atomic, login_required], 'dispatch')
 class GenerateCondominiumView(View):
     template_name = 'generate_condominium.html'
     form_class = MonthBillingForm
@@ -147,7 +152,7 @@ class GenerateCondominiumView(View):
             context = {'form': form, 'col_class': 'col-md-4'}
             return render(request, 'partials/form.html', context)
 
-        month_billing = form.save(commit=False)
+        month_billing: MonthBilling = form.save(commit=False)
         month_billing.edifice = self.edifice
 
         condominium_billings = []
@@ -160,14 +165,17 @@ class GenerateCondominiumView(View):
                     None, f'Preencha a medições do/a {residence} corretamente.'
                 )
 
-            condominium_billings.append(
-                CondominiumBilling(
-                    residence=residence,
-                    month_billing=month_billing,
-                    initial_water_reading=residence.last_water_reading,
-                    final_water_reading=water_reading,
-                )
+            condominium = CondominiumBilling(
+                residence=residence,
+                month_billing=month_billing,
+                initial_water_reading=residence.last_water_reading,
+                final_water_reading=water_reading,
+                rent=residence.rent,
             )
+            if month_billing.charge_iptu:
+                condominium.iptu = residence.iptu
+
+            condominium_billings.append(condominium)
 
             residence.last_water_reading = water_reading
             residences_to_update.append(residence)
@@ -177,7 +185,9 @@ class GenerateCondominiumView(View):
             return render(request, 'partials/form.html', context)
 
         month_billing.save()
+
         CondominiumBilling.objects.bulk_create(condominium_billings)
+
         Residence.objects.bulk_update(
             residences_to_update,
             fields=['last_water_reading'],
@@ -192,33 +202,104 @@ class GenerateCondominiumView(View):
         )
 
 
+class ResidenceDetailView(View):
+    form_class = ResidenceForm
+    template_name = 'residence_detail.html'
+
+    def get(self, request: HttpRequest, residence_id: int):
+        residence = get_object_or_404(
+            Residence, id=residence_id, edifice__user=request.user
+        )
+
+        form = self.form_class(instance=residence)
+        for _, field in form.fields.items():
+            field.disabled = True
+
+        context = {
+            'residence': residence,
+            'form': form,
+        }
+
+        return render(request, self.template_name, context)
+
+
+class ResidenceUpdateView(View):
+    form_class = ResidenceForm
+    template_name = 'residence_update.html'
+
+    def get(self, request: HttpRequest, residence_id: int):
+        residence = get_object_or_404(
+            Residence, id=residence_id, edifice__user=request.user
+        )
+        form = self.form_class(instance=residence)
+
+        context = {
+            'residence': residence,
+            'form': form,
+        }
+
+        return render(request, self.template_name, context)
+
+    def post(self, request: HttpRequest, residence_id: int):
+        residence = get_object_or_404(
+            Residence, id=residence_id, edifice__user=request.user
+        )
+        form = self.form_class(request.POST, instance=residence)
+
+        if not form.is_valid():
+            context = {'form': form}
+            return render(request, 'partials/form.html', context)
+
+        form.save()
+        messages.success(request, 'Residência atualizada com sucesso.')
+        return HttpResponseClientRedirect(
+            reverse('residence_detail', kwargs={'residence_id': residence_id})
+        )
+
+
 class CondominiumView(View):
+    template_name = 'condominium.html'
+
     def get(self, request: HttpRequest, condominium_id: int):
-        print(condominium_id)
-        condominium = get_object_or_404(MonthBilling, id=condominium_id, edifice__user=request.user)
+        condominium = get_object_or_404(
+            MonthBilling, id=condominium_id, edifice__user=request.user
+        )
         context = {'condominium': condominium}
-        return render(request, 'condominium.html', context)
+        return render(request, self.template_name, context)
 
 
 class CondominiumBillingPdfView(View):
-    def get(self, request: HttpRequest, condominium_billing_id: int):
-        billing = get_object_or_404(CondominiumBilling, id=condominium_billing_id, residence__edifice__user=request.user)
+    condominium_query = CondominiumBilling.objects.select_related('residence')
 
-        filename = f'Condomínio {billing.residence} {billing.month_billing.month}.pdf'
+    def get(self, request: HttpRequest, condominium_billing_id: int):
+        billing = get_object_or_404(
+            self.condominium_query,
+            id=condominium_billing_id,
+            residence__edifice__user=request.user,
+        )
+
+        filename = (
+            f'Condomínio {billing.residence} {billing.month_billing.month}.pdf'
+        )
 
         with tempfile.NamedTemporaryFile(suffix='.pdf') as tmp_pdf:
             fields = {
+                'ALUGUEL': 'rent',
                 'ÁGUA': 'water_price',
                 'ENERGIA': 'energy_price',
                 'FAXINEIRA': 'cleaning_price',
                 'MATERIAL DE LIMPEZA': 'cleaning_material_price',
                 'TAXA DE LIXO': 'trash_bill_price',
                 'TAXA DE ESGOTO': 'sewage_price',
-                'IPTU': 'iptu_price',
+                'IPTU': 'iptu',
                 'TAXA FIXA': 'residence.edifice.fixed_bill',
             }
             billing.generate_pdf(fields, tmp_pdf.name)
             tmp_pdf.seek(0)
-            response = FileResponse(open(tmp_pdf.name, 'rb'), content_type='application/pdf', filename=filename)
+            response = FileResponse(
+                open(tmp_pdf.name, 'rb'),
+                content_type='application/pdf',
+                filename=filename,
+            )
 
         return response

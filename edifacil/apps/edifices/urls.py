@@ -15,6 +15,16 @@ urlpatterns = [
         name='generate_condominium',
     ),
     path(
+        'residence/<int:residence_id>/',
+        views.ResidenceDetailView.as_view(),
+        name='residence_detail',
+    ),
+    path(
+        'residence/<int:residence_id>/update/',
+        views.ResidenceUpdateView.as_view(),
+        name='residence_update',
+    ),
+    path(
         'condominium/<int:condominium_id>',
         views.CondominiumView.as_view(),
         name='condominium',

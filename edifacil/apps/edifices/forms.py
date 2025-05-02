@@ -18,7 +18,14 @@ class EdificeForm(forms.ModelForm):
 class ResidenceForm(forms.ModelForm):
     class Meta:
         model = Residence
-        fields = ['last_water_reading', 'number', 'prefix', 'suffix']
+        fields = [
+            'last_water_reading',
+            'number',
+            'prefix',
+            'suffix',
+            'rent',
+            'iptu',
+        ]
 
 
 class MonthField(forms.DateField):
@@ -47,6 +54,6 @@ class MonthBillingForm(forms.ModelForm):
             'cleaning_material_bill_amount',
             'trash_bill_amount',
             'sewage_bill_amount',
-            'iptu_bill_amount',
             'others_bill_amount',
+            'charge_iptu',
         ]

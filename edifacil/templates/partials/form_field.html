@@ -14,7 +14,20 @@
     </div>
     <div class="mt-1 mb-3">
 
-        {{ field|add_class:"form-control" }}
+        {% if field.type %}{% endif %}
+
+
+        {% if field.field.widget.input_type in 'checkbox radio' %}
+
+            {{ field }}
+
+        {% else %}
+
+
+            {{ field|add_class:"form-control" }}
+
+        {% endif %}
+
 
         {% if field.field.help_text %}
 
@@ -28,6 +41,7 @@
             <div class="invalid-input-feedback">
 
                 {% for error in field.errors %}<p class="m-0">{{ error }}</p>{% endfor %}
+
 
             </div>
 
