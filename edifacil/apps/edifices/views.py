@@ -269,7 +269,7 @@ class CondominiumView(View):
 
 
 class CondominiumBillingPdfView(View):
-    condominium_query = CondominiumBilling.objects.select_related('residence')
+    condominium_query = CondominiumBilling.objects.select_related('residence', 'month_billing')
 
     def get(self, request: HttpRequest, condominium_billing_id: int):
         billing = get_object_or_404(
@@ -292,6 +292,7 @@ class CondominiumBillingPdfView(View):
                 'TAXA DE LIXO': 'trash_bill_price',
                 'TAXA DE ESGOTO': 'sewage_price',
                 'IPTU': 'iptu',
+                'OUTROS': 'month_billing.others_bill_amount',
                 'TAXA FIXA': 'residence.edifice.fixed_bill',
             }
             billing.generate_pdf(fields, tmp_pdf.name)
